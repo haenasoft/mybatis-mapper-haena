@@ -18,7 +18,7 @@
   "keywords": [
     "node.js",
     "mybatis",
-    "mysql"
+    "mysql",
     "postgresql"
   ],
   "dependencies": {
