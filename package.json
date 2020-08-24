@@ -1,30 +1,31 @@
 {
-  "name": "mybatis-mapper-myyrakle",
-  "version": "0.6.6",
-  "description": "mybatis-mapper can generate SQL statements from the MyBatis3 Mapper XML file in node.js. You can use Dynamic SQL elements",
-  "author": {
-    "name": "myyrakle",
-    "email": "sssang97@naver.com"
-  },
-  "contributors": [],
-  "scripts": {
-    "test": "mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/myyrakle/mybatis-mapper.git"
-  },
-  "main": "index.js",
-  "keywords": [
-    "node.js",
-    "mybatis",
-    "mysql",
-    "postgresql"
-  ],
-  "dependencies": {
-    "html-parse-stringify2": "2.0.1",
-    "sql-formatter": "2.3.2"
-  },
-  "license": "Apache-2.0",
-  "readmeFilename": "README.md"
+    "name": "mybatis-mapper-myyrakle",
+    "version": "0.7.0",
+    "description": "mybatis-mapper can generate SQL statements from the MyBatis3 Mapper XML file in node.js. You can use Dynamic SQL elements",
+    "author": {
+        "name": "myyrakle",
+        "email": "sssang97@naver.com"
+    },
+    "contributors": [],
+    "scripts": {
+        "test": "mocha"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/myyrakle/mybatis-mapper.git"
+    },
+    "main": "index.js",
+    "keywords": [
+        "node.js",
+        "mybatis",
+        "mysql",
+        "postgresql"
+    ],
+    "types": "index.d.ts",
+    "dependencies": {
+        "html-parse-stringify2": "2.0.1",
+        "sql-formatter": "2.3.2"
+    },
+    "license": "Apache-2.0",
+    "readmeFilename": "README.md"
 }
