@@ -1,283 +1,1173 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="fruit">  
+<mapper namespace="test">  
+    <select id="testVer2">
+    SELECT
+      name,
+      category,
+      price,
+      #{asdf},
+      #{foo},
+      #{bar}
+    FROM
+      fruits 
+    WHERE
+      category = 111
+  </select>
+
+
   <select id="testStringParameter">
     SELECT
       name,
       category,
       price
+      <if test="foobarfoofoobar_fooffo________obarfff__adoofoobarfoof____fff == true">, '으악' as foo</if>
     FROM
       fruits 
     WHERE
-      category = #{category}
+      category = 111
   </select>
 
-  <select id="testIntegerParameter">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    WHERE
-      category = #{category}
-      AND price >= ${price}
-  </select>
-  
-  <select id="testIf">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    WHERE
-      1=1
-      <if test="category != null and category !=''">
-        AND category = #{category}
-      </if>
-      <if test="price != null and price !=''">
-        AND price = ${price}
-      </if>
-      <if test="category == 'apple' and price >= 400">
-        AND name = 'Fuji'
-      </if>
-  </select>
+  <!-- 
+        오디션 작성자 확인용 
+        /director/audition/:audition_no PUT
+    -->
+    <select id="WHOSPICK.SELECT.001">
+        SELECT 
+            DIRECTOR_USER_NO
+        FROM    
+            TB_AUDITION
+        WHERE 1=1
+            AND AUDITION_NO = #{audition_no}
+    </select>
 
-  <select id="testTrim">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    <trim prefix="WHERE" prefixOverrides="AND|OR">
-        OR category = 'apple'
-        OR price = 200
-    </trim>
-  </select>
+    <!-- 
+        오디션 작성자 확인용 
+        /director/audition/notice/:audition_notice_no PUT
+    -->
+    <select id="WHOSPICK.SELECT.002">
+        SELECT 
+            DIRECTOR_USER_NO
+        FROM    
+            TB_AUDITION
+        WHERE 1=1
+            AND AUDITION_NO = (
+                SELECT AUDITION_NO 
+                FROM TB_AUDITION_NOTICE 
+                WHERE AUDITION_NOTICE_NO = #{audition_notice_no}
+                LIMIT 1
+            )
+    </select>
 
-  <select id="testWhere">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    <where>
-        AND category = 'apple'
-        OR price = 200
-        AND
-    </where>
-  </select>
-  
-  <select id="testChoose">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    <where>
-      <choose>
-        <when test="name != null">
-          AND name = #{name}
-        </when>
-        <when test="category == 'banana'">
-          AND category = #{category}
-          <if test="price != null and price !=''">
-            AND price = ${price}          
-          </if>
-        </when>
-        <otherwise>
-          AND category = 'apple'
-        </otherwise>
-      </choose>
-    </where>
-  </select>
-  
-  <select id="testForeach">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    <where>
-      category = 'apple' AND
-      <foreach collection="apples" item="name"  open="(" close=")" separator="OR">
-        name = #{name}
-      </foreach>
-    </where>
-  </select>
-  
-  <insert id="testInsert">
-    INSERT INTO
-      fruits
-    (
-      name,
-      category,
-      price      
-    )
-    VALUES
-    (
-      #{name},
-      #{category},
-      ${price}
-    )
-  </insert>
-  
-  <insert id="testInsertMulti">
-    INSERT INTO
-      fruits
-    (
-      name,
-      category,
-      price      
-    )
-    VALUES
-    <foreach collection="fruits" item="fruit"  separator=",">
-    (
-      #{fruit.name},
-      #{fruit.category},
-      ${fruit.price}
-    )
-    </foreach>
-  </insert>
-  
-  <select id="testForeachIf">
-    INSERT INTO
-      fruits
-    (
-      name,
-      category,
-      price      
-    )
-    VALUES
-    <foreach collection="fruits" item="fruit"  separator=",">
-      <if test="fruit.category != null and fruit.category == 'apple'">
+    <!-- 
+        찜한 배우 목록 조회 
+        /director/dibs-actor-list
+    -->
+    <select id="WHOSPICK.SELECT.LIST.001">
+        SELECT 
+            T2.* 
+        FROM 
         (
-          #{fruit.name},
-          #{fruit.category},
-          ${fruit.price}
-        )
-      </if>
-    </foreach>
-  </select>
-  
-  <select id="testIfInsideIf">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    WHERE
-      1=1
-      <if test="category != null and category !=''">
-        AND category = #{category}
-        <if test="price != null and price !=''">
-          AND price = ${price}          
+            SELECT 
+                T.*
+            FROM 
+            (
+                SELECT 
+                    A.ACTOR_NO
+                    , A.NAME
+                    , EXTRACT(YEAR FROM age(current_timestamp AT time ZONE 'Asia/Seoul', TO_TIMESTAMP(A.BIRTH_DT))) AS AGE
+                    , A.HEIGHT 
+                    , A.WEIGHT
+                    , C.URL AS IMAGE_URL
+                    , ARRAY_REMOVE(ARRAY_AGG(CASE 
+                        WHEN E.DIRECT_YN 
+                        THEN D.DIRECT_INPUT
+                        ELSE E.CONTENT
+                    END), NULL) AS KEYWORD
+                    , A.GENDER
+                    , A.INTRODUCE
+                    , F.AUDITION_ASK_NO IS NULL OR (
+                        F.RE_ASKABLE_DT
+                        &lt;= 
+                        floor(date_part('epoch'::text, now()))::bigint
+                    ) AS ASKABLE
+                    , CASE
+                        WHEN F.RE_ASKABLE_DT
+                            &lt;= 
+                            floor(date_part('epoch'::text, now()))::bigint
+                            THEN NULL
+                        ELSE    
+                            JUSTIFY_INTERVAL(TO_TIMESTAMP(F.RE_ASKABLE_DT)-CURRENT_TIMESTAMP)
+                    END AS ASKABLE_DT
+                FROM 
+                (
+                    SELECT 
+                        *
+                    FROM TB_DIBS_ACTOR
+                    WHERE 1=1
+                        AND DIBS_YN 
+                        AND DIRECTOR_USER_NO = #{user_no}
+                ) DIBS 
+                JOIN TB_ACTOR A 
+                ON 1=1
+                    AND DIBS.ACTOR_NO = A.ACTOR_NO
+                    AND A.USE_YN 
+                LEFT JOIN TB_ACTOR_IMAGE B 
+                ON 1=1
+                    AND A.ACTOR_NO = B.ACTOR_NO
+                    AND B.USE_YN 
+                    AND B.MAIN_YN
+                LEFT JOIN TB_IMAGE C
+                ON 1=1
+                    AND B.IMAGE_NO = C.IMAGE_NO
+                LEFT JOIN TB_ACTOR_DETAIL D 
+                ON 1=1  
+                    AND A.ACTOR_NO = D.ACTOR_NO
+                    AND D.USE_YN
+                LEFT JOIN TB_DETAIL_CHECKBOX E 
+                ON 1=1
+                    AND D.DETAIL_CHECKBOX_NO = E.DETAIL_CHECKBOX_NO
+                    AND E.DETAIL_CATEGORY_NO = (SELECT DETAIL_CATEGORY_NO FROM TB_DETAIL_CATEGORY WHERE CATEGORY_TYPE='DETAIL_IMAGE' LIMIT 1)
+                LEFT JOIN TB_AUDITION_ASK F 
+                ON 1=1
+                    AND A.ACTOR_NO = F.ACTOR_NO
+                    AND F.USE_YN 
+                GROUP BY
+                    A.NAME
+                    , A.BIRTH_DT
+                    , A.HEIGHT 
+                    , A.WEIGHT
+                    , C.URL 
+                    , A.GENDER
+                    , A.INTRODUCE
+                    , A.ACTOR_NO
+                    , F.AUDITION_ASK_NO
+                    , F.UPDT_DT
+            ) T 
+            WHERE 1=1
+                <if test="gender">
+                AND T.GENDER = #{gender}
+                </if>
+        ) T2
+        <if test="limit">
+        OFFSET ${offset} 
+        LIMIT ${limit}
         </if>
-        <if test="name != null and name !=''">
-          AND name = #{name}          
-        </if>
-      </if>
-  </select>
-  
-  <select id="testCdata">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    WHERE
-      <![CDATA[ price < 500 AND ]]>
-      name = <![CDATA[ "&It is CDATA test><"  ]]>
-  </select>
-  
-  <select id="testBind">
-    <bind name="likeName" value="'%'+data.name+'%'"/>
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    WHERE
-      name like #{likeName}
-      <if test="data.name != null and data.name !=''">
-        OR name = #{data.name}
-      </if>
-  </select>
-  
-  <update id="testSet">
-    UPDATE
-      fruits
-    <set>
-      <if test="category != null and category !=''">
-        category = #{category},
-      </if>
-      <if test="price != null and price !=''">
-        price = ${price},    
-      </if>
-    </set>
-    WHERE
-      name = #{name}
-  </update>
-  
-  <sql id="sometable">
-    fruits
-  </sql>
-  
-  <sql id="somewhere">
-    WHERE
-      category = #{category}
-  </sql>
-  
-  <sql id="someinclude">
-    FROM
-      <include refid="${include_target}"/>
-    <include refid="somewhere"/>
-  </sql>
-  
-  <select id="testInclude">
-    SELECT
-      name,
-      category,
-      price
-    <include refid="someinclude">
-      <property name="prefix" value="Some"/>
-      <property name="include_target" value="sometable"/>
-    </include>
-  </select>
-  
-  <select id="testForeachZero">
-    select
-    from
-      user
-    where
-    in
-    (
-      <foreach collection="IDs" item="ID" separator=",">
-      #{ID}
-      </foreach>
-    )
-  </select>
+    </select>
 
-  <select id="testNullParameter">
-    SELECT
-      name,
-      category,
-      price
-    FROM
-      fruits 
-    <where>
-      category = #{category}
-      <if test="price != null and price !=''">
-        AND price = ${price}
-      </if>       
-    </where>
-  </select>
+    <!-- 
+        평가요청 목록 조회 
+        /director/eval-apply-list
+    -->
+    <select id="WHOSPICK.SELECT.LIST.002">
+        SELECT 
+            'ACTOR' AS DATA_TYPE 
+            , A.ACTOR_NO
+            , A.NAME
+            , EXTRACT(YEAR FROM age(current_timestamp AT time ZONE 'Asia/Seoul', TO_TIMESTAMP(A.BIRTH_DT))) AS AGE
+            , A.HEIGHT 
+            , A.WEIGHT
+            , A.EVAL_YN 
+            , A.EVAL_APPLY_NO 
+            , A.AUDITION_NO
+            , C.URL AS IMAGE_URL
+            , ARRAY_REMOVE(ARRAY_AGG(CASE 
+                WHEN E.DIRECT_YN 
+                THEN D.DIRECT_INPUT
+                ELSE E.CONTENT
+            END), NULL) AS KEYWORD
+        FROM 
+        (
+            SELECT 
+                A.EVAL_APPLY_NO
+                , A.AUDITION_NO 
+                , B.*
+                , C.EVAL_NO IS NOT NULL AS EVAL_YN
+            FROM 
+            (
+                SELECT * 
+                FROM TB_EVAL_APPLY
+                WHERE 1=1
+                AND AUDITION_NO IN (SELECT AUDITION_NO FROM TB_AUDITION WHERE DIRECTOR_USER_NO = 1)
+                AND USE_YN 
+            ) A 
+            JOIN TB_ACTOR B 
+            ON 1=1
+                AND A.ACTOR_NO = B.ACTOR_NO 
+                AND B.USE_YN 
+            LEFT JOIN TB_EVAL C 
+            ON 1=1
+                AND A.EVAL_APPLY_NO = C.EVAL_APPLY_NO
+        ) A 
+        LEFT JOIN TB_ACTOR_IMAGE B 
+        ON 1=1
+            AND A.ACTOR_NO = B.ACTOR_NO
+            AND B.USE_YN 
+            AND B.MAIN_YN
+        LEFT JOIN TB_IMAGE C
+        ON 1=1
+            AND B.IMAGE_NO = C.IMAGE_NO
+        LEFT JOIN TB_ACTOR_DETAIL D 
+        ON 1=1  
+            AND A.ACTOR_NO = D.ACTOR_NO
+            AND D.USE_YN
+        LEFT JOIN TB_DETAIL_CHECKBOX E 
+        ON 1=1
+            AND D.DETAIL_CHECKBOX_NO = E.DETAIL_CHECKBOX_NO
+            AND E.DETAIL_CATEGORY_NO = (SELECT DETAIL_CATEGORY_NO FROM TB_DETAIL_CATEGORY WHERE CATEGORY_TYPE='DETAIL_IMAGE' LIMIT 1)
+        GROUP BY
+            A.ACTOR_NO
+            , A.NAME
+            , A.BIRTH_DT
+            , A.HEIGHT 
+            , A.WEIGHT
+            , C.URL 
+            , A.EVAL_YN 
+            , A.EVAL_APPLY_NO 
+            , A.AUDITION_NO
+        OFFSET ${offset} 
+        LIMIT ${limit}
+    </select>
+
+    <!-- 
+        합격자 관리 목록
+        /director/audition-apply-list/:audition_no GET
+    -->
+    <select id="WHOSPICK.SELECT.LIST.003">
+        SELECT 
+            A.AUDITION_APPLY_NO
+            , B.AUDITION_RECRUIT_NO 
+            , B.ROLE_NAME 
+            , COUNT(1) AS EACH_COUNT
+            , JSONB_AGG(JSONB_BUILD_OBJECT(
+                'audition_apply_no'
+                , A.AUDITION_APPLY_NO 
+                , 'actor_no'
+                , C.ACTOR_NO
+                , 'name'
+                , C.NAME  
+                , 'weight'
+                , C.WEIGHT 
+                , 'height'
+                , C.HEIGHT
+                , 'age'
+                , EXTRACT(YEAR FROM age(current_timestamp AT time ZONE 'Asia/Seoul', TO_TIMESTAMP(C.BIRTH_DT))) 
+                , 'profile_image'
+                , E.URL
+                , 'mobile_no'
+                , F.MOBILE_NO 
+            )) AS item
+        FROM 
+        (
+            SELECT * 
+            FROM TB_AUDITION_APPLY A
+            WHERE 1=1 
+                <!-- AND AUDITION_NO = #{audition_no}-->
+                AND EXISTS (SELECT 1 FROM TB_AUDITION B WHERE B.USE_YN AND B.DIRECTOR_USER_NO = #{user_no} AND A.AUDITION_NO = B.AUDITION_NO)
+                AND PASS_TYPE_NO = #{pass_type_no}
+                AND USE_YN 
+        ) A 
+        LEFT JOIN TB_AUDITION_RECRUIT B 
+        ON 1=1
+            AND A.AUDITION_RECRUIT_NO = B.AUDITION_RECRUIT_NO
+            AND B.USE_YN 
+        LEFT JOIN TB_ACTOR C 
+        ON 1=1
+            AND A.ACTOR_NO = C.ACTOR_NO 
+            AND C.USE_YN 
+        LEFT JOIN TB_ACTOR_IMAGE D 
+        ON 1=1 
+            AND C.ACTOR_NO = D.ACTOR_NO 
+            AND D.USE_YN 
+            AND D.MAIN_YN 
+        LEFT JOIN TB_IMAGE E 
+        ON 1=1
+            AND D.IMAGE_NO = E.IMAGE_NO 
+            AND E.USE_YN 
+        LEFT JOIN TB_USER F
+        ON 1=1
+            AND C.USER_NO = F.USER_NO
+        GROUP BY 
+            A.AUDITION_APPLY_NO
+            , B.AUDITION_RECRUIT_NO 
+            , B.ROLE_NAME 
+        ORDER BY 
+            B.AUDITION_RECRUIT_NO 
+    </select>
+
+    <!-- 
+        내 오디션 공고 목록
+        /director/my-audition-list GET
+    -->
+    <select id="WHOSPICK.SELECT.LIST.004">
+        SELECT 
+            A.AUDITION_NO
+            , A.TITLE 
+            , A.COMPANY 
+            , A.DIRECTOR_NAME 
+            , COALESCE(E.CONTENT, D.CONTENT) AS CATEGORY
+            , A.REG_DT 
+            , A.DEADLINE 
+            , ARRAY_AGG(
+                DISTINCT C.CONTENT
+                ORDER BY C.CONTENT DESC
+            ) AS CAST_LIST
+            , #{audition_status}::INTEGER AS AUDITION_STATUS
+        FROM 
+        (
+            SELECT 
+                A.AUDITION_NO 
+                , A.WORK_TYPE_NO
+                , A.WORK_TYPE_DETAIL_NO
+                , A.TITLE 
+                , A.COMPANY 
+                , A.DIRECTOR_NAME 
+                , A.REG_DT 
+                , A.DEADLINE 
+            FROM TB_AUDITION A
+            WHERE 1=1
+                AND DIRECTOR_USER_NO = #{user_no} 
+                AND USE_YN 
+                AND AUDITION_STATUS = #{audition_status}
+        ) A
+        LEFT JOIN TB_AUDITION_RECRUIT B
+        ON 1=1
+            AND A.AUDITION_NO = B.AUDITION_NO
+            AND B.USE_YN 
+        LEFT JOIN TB_ROLE_WEIGHT C 
+        ON 1=1
+            AND B.ROLE_WEIGHT_NO = C.ROLE_WEIGHT_NO
+            AND C.USE_YN 
+        LEFT JOIN TB_WORK_TYPE D
+        ON 1=1
+            AND A.WORK_TYPE_NO = D.WORK_TYPE_NO 
+            AND D.USE_YN 
+        LEFT JOIN TB_WORK_TYPE_DETAIL E 
+        ON 1=1
+            AND A.WORK_TYPE_DETAIL_NO = E.WORK_TYPE_DETAIL_NO
+        GROUP BY 
+            A.AUDITION_NO
+            , D.CONTENT 
+            , E.CONTENT
+            , A.TITLE 
+            , A.COMPANY 
+            , A.DIRECTOR_NAME 
+            , A.REG_DT 
+            , A.DEADLINE 
+        ORDER BY A.AUDITION_NO DESC
+    </select>
+
+    <!-- 
+        회원가입 후 개인정보 등록입니다. 
+        /director/my-privacy POST
+    -->
+    <insert id="WHOSPICK.INSERT.001">
+        -- 감독 경력 삽입
+        INSERT INTO TB_DIRECTOR_CAREER
+        (USER_NO, CATEGORY, CONTENT)
+        VALUES ${career_values}
+    </insert>
+
+    <!-- 
+        회원가입 후 개인정보 등록
+        감독 활동사진 삽입입니다.
+        /director/my-privacy POST
+    -->
+    <insert id="WHOSPICK.INSERT.002">
+        -- 감독 활동사진 삽입
+        INSERT INTO TB_DIRECTOR_IMAGE
+        (USER_NO, IMAGE_NO)
+        VALUES ${image_values}
+    </insert>
+
+    <!-- 
+        오디션 및 포스터 등록입니다.
+        /director/audition POST
+    -->
+    <insert id="WHOSPICK.INSERT.003">
+        -- 오디션 삽입
+        WITH
+        AUDITION_RESULT AS 
+        (
+            INSERT INTO TB_AUDITION
+            (
+                DIRECTOR_USER_NO
+                , WORK_TYPE_NO
+                , WORK_TYPE_DETAIL_NO
+                , WORK_TITLE
+                , COMPANY
+                , DIRECTOR_NAME 
+                , MANAGER
+                , SHOOT_START
+                , SHOOT_END
+                , SHOOT_PLACE
+                , FEE
+                , MALE_COUNT
+                , FEMALE_COUNT
+                , DEADLINE
+                , TITLE 
+                , CONTENT
+            )
+            VALUES
+            (
+                #{user_no}
+                , #{work_type_no}
+                , #{work_type_detail_no}
+                , #{work_title}
+                , #{company}
+                , #{director_name}
+                , #{manager}
+                , #{shoot_start}
+                , #{shoot_end}
+                , #{shoot_place}
+                , #{fee}
+                , #{male_count}
+                , #{female_count}
+                , #{deadline}
+                , #{title}
+                , #{content} 
+            )
+            RETURNING AUDITION_NO
+        )
+        -- 포스터 삽입
+        <if test="has_image">
+        , _POSTER AS 
+        (
+            INSERT INTO TB_AUDITION_POSTER 
+            (AUDITION_NO, IMAGE_NO)
+            SELECT
+                (SELECT AUDITION_NO FROM AUDITION_RESULT)
+                , T.IMAGE_NO
+            FROM 
+            (
+                VALUES ${image_no_values}
+            ) T(IMAGE_NO)
+        )
+        </if>
+        -- 장르 삽입
+        , _GENRE AS 
+        (
+            INSERT INTO TB_AUDITION_GENRE
+            (
+                AUDITION_NO
+                , DETAIL_CHECKBOX_NO
+                , DIRECT_INPUT
+            )
+            SELECT
+                (SELECT AUDITION_NO FROM AUDITION_RESULT)
+                , T.DETAIL_CHECKBOX_NO
+                , T.DIRECT_INPUT
+            FROM 
+            (
+                VALUES ${genre_values}
+            ) T(DETAIL_CHECKBOX_NO, DIRECT_INPUT)
+        )
+        , _NOTIFY AS 
+        (
+            INSERT INTO TB_NOTIFY(USER_NO, USER_TYPE, CONTENT, LINK)
+            VALUES 
+            (
+                #{user_no} 
+                , 'DIRECTOR'
+                , '더 많은 배우님들을 찜하여 지원률을 높여주세요.'
+                , 'ACTOR_SEARCH_PAGE'
+            )
+        )
+        , _NOTIFY2 AS 
+        (
+            INSERT INTO TB_NOTIFY(USER_NO, USER_TYPE, CONTENT, AUDITION_NO, LINK)
+            SELECT 
+                T.USER_NO
+                , 'ACTOR'
+                , '새로운 오디션이 등록 되었습니다.'
+                , (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+                , 'AUDITION'
+            FROM 
+            (
+                SELECT USER_NO 
+                FROM TB_USER_TYPE 
+                WHERE 1=1
+                    AND USE_YN 
+                    AND USER_TYPE = 'ACTOR'
+            ) T
+        )
+        SELECT AUDITION_NO FROM AUDITION_RESULT
+    </insert>
+
+    <!-- 
+        오디션 배역목록 등록입니다. 
+        /director/audition POST
+    -->
+    <insert id="WHOSPICK.INSERT.004">
+        WITH 
+        RECRUIT_RESULT AS 
+        (
+            INSERT INTO TB_AUDITION_RECRUIT
+            (
+                AUDITION_NO
+                , ROLE_NAME
+                , ROLE_WEIGHT_NO
+                , GENDER
+                , AGE_NO
+                , HEIGHT_NO
+                , WEIGHT_NO
+                , INTRODUCE
+            )
+            VALUES 
+            ( 
+                #{audition_no}
+                , #{role_name}
+                , #{role_weight_no}
+                , #{gender}
+                , #{age_no}
+                , #{height_no}
+                , #{weight_no}
+                , #{introduce}
+            )
+            RETURNING *
+        ) 
+        , RECRUIT_DETAIL_RESULT AS 
+        (
+            INSERT INTO TB_AUDITION_RECRUIT_DETAIL
+            (
+                AUDITION_RECRUIT_NO
+                , DETAIL_CHECKBOX_NO
+                , DIRECT_INPUT
+            )
+            SELECT 
+                (SELECT AUDITION_RECRUIT_NO FROM RECRUIT_RESULT)
+                , T.DETAIL_CHECKBOX_NO
+                , T.DIRECT_INPUT
+            FROM 
+            (
+                VALUES ${detail_values}
+            ) T(DETAIL_CHECKBOX_NO, DIRECT_INPUT)
+        )
+        , INFO AS 
+        (
+            SELECT 
+                (SELECT WEIGHT FROM TB_AGE WHERE AGE_NO = (SELECT AGE_NO FROM RECRUIT_RESULT) LIMIT 1) AS AGE
+                , (SELECT WEIGHT FROM TB_HEIGHT WHERE HEIGHT_NO = (SELECT HEIGHT_NO FROM RECRUIT_RESULT) LIMIT 1) AS HEIGHT
+                , (SELECT WEIGHT FROM TB_WEIGHT WHERE WEIGHT_NO = (SELECT WEIGHT_NO FROM RECRUIT_RESULT) LIMIT 1) AS WEIGHT
+        )
+        , INSERT_NOTIFY AS 
+        (
+            INSERT INTO TB_NOTIFY
+            (
+                USER_NO 
+                , USER_TYPE
+                , CONTENT
+                , LINK
+                , AUDITION_NO
+            )
+            SELECT 
+                A.USER_NO
+                , 'ACTOR'
+                , '배우님. 프로필과 일치하는 배역이 있습니다.'
+                , 'AUDITION'
+                , #{audition_no}
+            FROM TB_ACTOR A
+            WHERE 1=1
+                AND A.USE_YN 
+                AND A.GENDER = (SELECT GENDER FROM RECRUIT_RESULT)
+                AND BIRTH_DT BETWEEN 
+                    floor(date_part('epoch'::text, 
+                        (CURRENT_TIMESTAMP - INTERVAL '1 YEAR' * (SELECT AGE+10 FROM INFO))
+                    ))::bigint
+                    AND 
+                    floor(date_part('epoch'::text, 
+                        (CURRENT_TIMESTAMP - INTERVAL '1 YEAR' * (SELECT AGE-1 FROM INFO))
+                    ))::bigint
+                AND HEIGHT BETWEEN 
+                    (SELECT HEIGHT FROM INFO)
+                    AND 
+                    (SELECT HEIGHT FROM INFO) + 9
+                AND WEIGHT BETWEEN 
+                    (SELECT WEIGHT FROM INFO)
+                    AND 
+                    (SELECT WEIGHT FROM INFO) + 9
+                -- AND DETAIL_CHECKBOX_NO
+                <!-- AND NOT EXISTS(
+                    SELECT 1 
+                    FROM TB_NOTIFY 
+                    WHERE 1=1
+                        AND USER_NO = A.USER_NO
+                        AND LINK = 'AUDITION'
+                        AND ACTOR_TYPE = 'ACTOR'
+                ) -->
+            RETURNING NOTIFY_NO
+        )
+        SELECT NOTIFY_NO FROM INSERT_NOTIFY
+    </insert>
+
+    <!-- 
+        없음
+    -->
+    <insert id="WHOSPICK.INSERT.009">
+        -- 
+    
+    </insert>
+
+    <!-- 
+        오디션 및 포스터 수정입니다. 
+        /director/audition POST
+    -->
+    <update id="WHOSPICK.UPDATE.001">
+        -- 오디션 수정
+        WITH
+        AUDITION_RESULT AS 
+        (
+            UPDATE TB_AUDITION
+            SET
+                WORK_TYPE_NO = #{work_type_no}
+                , WORK_TYPE_DETAIL_NO = #{work_type_detail_no}
+                , WORK_TITLE = #{work_title}
+                , COMPANY = #{company}
+                , DIRECTOR_NAME = #{director_name}
+                , MANAGER = #{manager}
+                , SHOOT_START = #{shoot_start}
+                , SHOOT_END = #{shoot_end}
+                , SHOOT_PLACE = #{shoot_place}
+                , FEE = #{fee}
+                , MALE_COUNT = #{male_count}
+                , FEMALE_COUNT = #{female_count}
+                , DEADLINE = #{deadline}
+                , TITLE = #{title}
+                , CONTENT = #{content} 
+            WHERE 1=1 
+                AND AUDITION_NO = #{audition_no}
+            RETURNING AUDITION_NO
+        )
+        -- 포스터 삽입
+        <if test="has_image">
+        , _REMOVE_POSTER AS 
+        (
+            UPDATE TB_AUDITION_POSTER
+            SET 
+                USE_YN = FALSE
+            WHERE 1=1
+                AND AUDITION_NO = (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+        )
+        , _INSERT_POSTER AS 
+        (
+            INSERT INTO TB_AUDITION_POSTER 
+            (AUDITION_NO, IMAGE_NO)
+            SELECT
+                (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+                , T.IMAGE_NO
+            FROM 
+            (
+                VALUES ${image_no_values}
+            ) T(IMAGE_NO)
+        )
+        </if>
+        -- 장르 삭제
+        , _REMOVE_GENRE AS 
+        (
+            UPDATE TB_AUDITION_GENRE
+            SET 
+                USE_YN = FALSE
+            WHERE 1=1
+                AND AUDITION_NO = (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+        )
+        -- 장르 삽입
+        , _INSERT_GENRE AS 
+        (
+            INSERT INTO TB_AUDITION_GENRE
+            (
+                AUDITION_NO
+                , DETAIL_CHECKBOX_NO
+                , DIRECT_INPUT
+            )
+            SELECT
+                (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+                , T.DETAIL_CHECKBOX_NO
+                , T.DIRECT_INPUT
+            FROM 
+            (
+                VALUES ${genre_values}
+            ) T(DETAIL_CHECKBOX_NO, DIRECT_INPUT)
+        )
+        , REMOVE_AUDITION_RECRUIT AS 
+        (
+            UPDATE TB_AUDITION_RECRUIT
+            SET 
+                USE_YN = FALSE
+            WHERE 1=1
+                AND AUDITION_NO = (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+            RETURNING AUDITION_RECRUIT_NO
+        )
+        , _REMOVE_AUDITION_RECRUIT_DETAIL AS 
+        (
+            UPDATE TB_AUDITION_RECRUIT_DETAIL
+            SET 
+                USE_YN = FALSE
+            WHERE AUDITION_RECRUIT_NO IN (SELECT AUDITION_RECRUIT_NO FROM REMOVE_AUDITION_RECRUIT)
+        )
+        SELECT AUDITION_NO FROM AUDITION_RESULT
+    </update>
+
+    <!-- 
+        오디션 이동 
+        /director/archive-audition/:audition_no PUT
+        /director/close-audition/:audition_no PUT
+    -->
+    <update id="WHOSPICK.UPDATE.002">
+        -- 오디션 이동
+        UPDATE TB_AUDITION
+        SET
+            <if test="close">
+            AUDITION_STATUS = 1
+            , CLOSED_DT = floor(date_part('epoch'::text, now()))::bigint
+            </if>
+            <if test="archive">
+            AUDITION_STATUS = 2
+            </if>
+        WHERE 1=1
+            AND USE_YN
+            AND AUDITION_NO = #{audition_no}
+    </update>
+
+    <!-- 
+        오디션 삭제
+        /director/audition/:audition_no DELETE
+    -->
+    <delete id="WHOSPICK.DELETE.002">
+        -- 오디션 삭제
+        WITH 
+        AUDITION_RESULT AS
+        (
+            UPDATE TB_AUDITION
+            SET
+                USE_YN = FALSE
+            WHERE 1=1
+                AND USE_YN
+                AND AUDITION_NO = #{audition_no}
+            RETURNING AUDITION_NO
+        )
+        -- 포스터 이미지 삭제
+        , _REMOVE_POSTER AS 
+        (
+            UPDATE TB_AUDITION_POSTER
+            SET 
+                USE_YN = FALSE
+            WHERE 1=1
+                AND AUDITION_NO = (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+        )
+        -- 장르 삭제
+        , _REMOVE_GENRE AS 
+        (
+            UPDATE TB_AUDITION_GENRE
+            SET 
+                USE_YN = FALSE
+            WHERE 1=1
+                AND AUDITION_NO = (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+        )
+        -- 채용목록 삭제
+        , REMOVE_AUDITION_RECRUIT AS 
+        (
+            UPDATE TB_AUDITION_RECRUIT
+            SET 
+                USE_YN = FALSE
+            WHERE 1=1
+                AND AUDITION_NO = (SELECT AUDITION_NO FROM AUDITION_RESULT LIMIT 1)
+            RETURNING AUDITION_RECRUIT_NO
+        )
+        -- 채용목록 상세정보 삭제
+        , _REMOVE_AUDITION_RECRUIT_DETAIL AS 
+        (
+            UPDATE TB_AUDITION_RECRUIT_DETAIL
+            SET 
+                USE_YN = FALSE
+            WHERE AUDITION_RECRUIT_NO IN (SELECT AUDITION_RECRUIT_NO FROM REMOVE_AUDITION_RECRUIT)
+        )
+        SELECT 1
+    </delete>
+
+    <!-- 
+        오디션 합격 OR 불합격 처리
+        /director/pass-audition-apply/:audition_apply_no PUT
+    -->
+    <update id="WHOSPICK.UPDATE.003">
+        -- 오디션 합격 OR 불합격 처리
+        WITH 
+        UPDATE_RESULT AS
+        (
+            UPDATE TB_AUDITION_APPLY THIS
+            SET
+                UPDT_DT = floor(date_part('epoch'::text, now()))::bigint
+                <if test="pass_yn">
+                , PASS_TYPE_NO = ABS(THIS.PASS_TYPE_NO) + 1
+                </if>
+                <if test="!pass_yn">
+                , PASS_TYPE_NO = -(ABS(THIS.PASS_TYPE_NO) + 1)
+                </if>
+            WHERE 1=1
+                AND USE_YN
+                AND AUDITION_APPLY_NO = #{audition_apply_no}
+            RETURNING PASS_TYPE_NO, ACTOR_NO, AUDITION_APPLY_NO, AUDITION_NO
+        ) 
+        INSERT INTO TB_NOTIFY
+        (
+            USER_NO
+            , USER_TYPE
+            , CONTENT
+            , AUDITION_NO 
+            , LINK
+        )
+        SELECT 
+            (SELECT USER_NO FROM TB_ACTOR WHERE ACTOR_NO = (SELECT ACTOR_NO FROM UPDATE_RESULT LIMIT 1) LIMIT 1)
+            , 'ACTOR'
+            , (SELECT WORK_TITLE FROM TB_AUDITION WHERE AUDITION_NO = (SELECT AUDITION_NO FROM UPDATE_RESULT LIMIT 1)) 
+                || ' 오디션 '
+                || (SELECT PASS_TYPE_NO FROM UPDATE_RESULT LIMIT 1)::TEXT
+                || '차 합격을 축하드립니다! 시간, 날짜, 대사, 장소 공지사항을 확인해주세요.'
+            , (SELECT AUDITION_NO FROM UPDATE_RESULT LIMIT 1)
+            , 'AUDITION'
+        FROM 
+        (
+            VALUES (NULL)   
+        ) T(_NULL)
+        WHERE (SELECT PASS_TYPE_NO FROM UPDATE_RESULT LIMIT 1) > 0
+    </update>
+
+    <!-- 
+        프로필 평가 
+        /director/eval-profile/:eval_apply_no POST
+    -->
+    <insert id="WHOSPICK.INSERT.005">
+        WITH 
+        <!--CHARGE_POINT AS 
+        (
+            UPDATE TB_USER AS THIS 
+            SET 
+                POINT = THIS.POINT + 50 
+            WHERE 1=1
+                AND USER_NO = #{user_no}
+                AND NOT EXISTS (
+                    SELECT 1 
+                    FROM TB_EVAL 
+                    WHERE 1=1
+                        AND USE_YN 
+                        AND EVAL_APPLY_NO = #{eval_apply_no} 
+                )
+            RETURNING *
+        )
+        , CHARGE_POINT_HISTORY AS 
+        (
+            INSERT INTO TB_PAY
+            (
+                USER_NO 
+                , USER_TYPE
+                , PAY_TYPE
+                , CONTENT 
+                , PAY_METHOD
+                , CHARGE_POINT
+            )
+            SELECT 
+                #{user_no}
+                , 'DIRECTOR'
+                , 'EVAL_PROFILE'
+                , (
+                    SELECT NAME 
+                    FROM TB_ACTOR 
+                    WHERE ACTOR_NO = (
+                        SELECT ACTOR_NO 
+                        FROM TB_EVAL_APPLY 
+                        WHERE EVAL_APPLY_NO = #{eval_apply_no} 
+                        LIMIT 1
+                    ) 
+                    LIMIT 1
+                ) || '님 프로필 평가'
+                , 'NO'
+                , 50
+            FROM (SELECT NULL) _T
+            WHERE EXISTS(SELECT 1 FROM CHARGE_POINT)
+        ) 
+        , --> INSERT_RESULT AS 
+        (
+            INSERT INTO TB_EVAL
+            (
+                EVAL_APPLY_NO
+                , STAR
+                , eval_feedback_type_no
+                , DIRECT_INPUT
+            )
+            VALUES
+            (
+                #{eval_apply_no} 
+                , #{star}
+                , #{eval_feedback_type_no}
+                , #{direct_input}
+            )
+            ON CONFLICT (EVAL_APPLY_NO) DO
+            UPDATE
+            SET 
+                STAR = #{star}
+                , eval_feedback_type_no = #{eval_feedback_type_no}
+                , DIRECT_INPUT = #{direct_input}
+            RETURNING EVAL_NO
+        )
+        INSERT INTO TB_NOTIFY(USER_NO, USER_TYPE, CONTENT, EVAL_NO, LINK)
+        VALUES 
+        (
+            (
+                SELECT USER_NO 
+                FROM TB_ACTOR 
+                WHERE ACTOR_NO = (SELECT ACTOR_NO FROM TB_EVAL_APPLY WHERE EVAL_APPLY_NO = #{eval_apply_no})
+                LIMIT 1
+            )
+            , 'ACTOR'
+            , (
+                SELECT USER_NAME 
+                FROM TB_USER
+                WHERE USER_NO = #{user_no}
+                LIMIT 1
+            )
+            ||' 디렉터님이 프로필 평가를 남겼습니다.'
+            , (SELECT EVAL_NO FROM INSERT_RESULT LIMIT 1)
+            , 'EVAL'
+        )
+        RETURNING EVAL_NO
+    </insert>
+
+    <!-- 
+        배우 찜하기 
+        /director/dibs-actor/:actor_no POST
+    -->
+    <insert id="WHOSPICK.INSERT.006">
+        WITH 
+        INSERT_RESULT AS 
+        (
+            INSERT INTO TB_DIBS_ACTOR
+            (
+                DIRECTOR_USER_NO
+                , ACTOR_NO
+            )
+            VALUES
+            (
+                #{user_no}
+                , #{actor_no} 
+            )
+            ON CONFLICT (DIRECTOR_USER_NO, ACTOR_NO) DO
+            UPDATE 
+            SET 
+                DIBS_YN = TRUE
+        )
+        INSERT INTO TB_NOTIFY(USER_NO, USER_TYPE, CONTENT, LINK)
+        VALUES 
+        (
+            (
+                SELECT USER_NO 
+                FROM TB_ACTOR 
+                WHERE ACTOR_NO = #{actor_no} 
+                LIMIT 1
+            )
+            , 'ACTOR'
+            , '나를 픽한 디렉터가 있습니다. 오디션에 도전해보세요.'
+            , 'DIBS_ME_DIRECTOR'
+        )
+    </insert>
+
+    <!-- 
+        배우 찜 삭제하기 
+        /actor/undibs-audition PUT
+    -->
+    <insert id="WHOSPICK.DELETE.001">
+        UPDATE TB_DIBS_ACTOR
+        SET 
+            DIBS_YN = FALSE
+        WHERE 1=1
+            AND DIRECTOR_USER_NO = #{user_no}
+            AND ACTOR_NO IN ${actor_no_list}
+    </insert>
+
+    <!-- 
+        일간 조횟수 초기화 or 갱신
+        /director/actor/:actor_no GET
+    -->
+    <insert id="WHOSPICK.INSERT.007">
+        -- 일간 조횟수 초기화 or 갱신 
+        WITH 
+        UPDATE_VIEW AS 
+        (
+            UPDATE TB_ACTOR 
+            SET 
+                VIEW_COUNT = TB_ACTOR.VIEW_COUNT + 1
+            WHERE 1=1
+                AND ACTOR_NO = #{actor_no}
+        ) 
+        , INSERT_NOTIFY AS
+        (
+            INSERT INTO TB_NOTIFY(USER_NO, USER_TYPE, CONTENT)
+            VALUES 
+            (
+                (
+                    SELECT USER_NO 
+                    FROM TB_ACTOR 
+                    WHERE 1=1
+                        AND ACTOR_NO = #{actor_no}
+                        AND USE_YN
+                    LIMIT 1
+                )
+                , 'ACTOR'
+                , (SELECT USER_NAME FROM TB_USER WHERE USER_NO = #{user_no} LIMIT 1) || ' 디렉터가 배우님의 프로필을 확인했습니다.'
+            )
+        ) 
+        INSERT INTO TB_ACTOR_TODAY_VIEW
+        (
+            ACTOR_NO
+            , YMD
+            , VIEW_COUNT
+        )
+        VALUES
+        (
+            #{actor_no}
+            , TO_CHAR(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Seoul', 'YYYYMMDD')::INTEGER
+            , 1
+        )
+        ON CONFLICT (ACTOR_NO, YMD) DO
+        UPDATE 
+        SET 
+            VIEW_COUNT = TB_ACTOR_TODAY_VIEW.VIEW_COUNT + 1
+            , UPDT_DT = floor(date_part('epoch'::text, now()))::bigint
+    </insert>
+
+    <!-- 
+        오디션 공지사항 등록
+        /director/audition/{audition_no}/notice POST
+    -->
+    <insert id="WHOSPICK.INSERT.008">
+        -- 오디션 공지사항 등록
+        WITH 
+        AUDITION_NOTICE AS 
+        (
+            INSERT INTO TB_AUDITION_NOTICE
+            (
+                AUDITION_NO
+                , TITLE
+                , CONTENT 
+                , AUDITION_NOTICE_LEVEL
+            )
+            SELECT 
+                #{audition_no}
+                , #{title} 
+                , #{content}
+                , #{audition_notice_level}
+            RETURNING *
+        )
+        SELECT * FROM AUDITION_NOTICE
+    </insert>
+
+    <!-- 
+        오디션 공지사항 수정
+    -->
+    <insert id="WHOSPICK.UPDATE.004">
+        -- 오디션 공지사항 등록
+        WITH 
+        AUDITION_NOTICE AS 
+        (
+            UPDATE TB_AUDITION_NOTICE
+            SET
+                TITLE = #{title} 
+                , CONTENT = #{content}
+                , AUDITION_NOTICE_LEVEL = #{audition_notice_level}
+            WHERE 1=1
+                AND AUDITION_NOTICE_NO = #{audition_notice_no}
+            RETURNING *
+        )
+        SELECT * FROM AUDITION_NOTICE
+    </insert>
+
+    <!-- 
+        오디션 공지사항 삭제
+        /director/audition/notice/:audition_notice_no DELETE
+    -->
+    <delete id="WHOSPICK.DELETE.003">
+        -- 오디션 공지사항 삭제
+        UPDATE TB_AUDITION_NOTICE
+        SET 
+            USE_YN = FALSE 
+        WHERE 1=1
+            AND AUDITION_NOTICE_NO = #{audition_notice_no}
+    </delete>
+
+    <!-- 
+        오디션 공지사항 공개 제어
+        /director/audition/notice/:audition_notice_no/public PUT
+    -->
+    <insert id="WHOSPICK.UPDATE.005">
+        -- 오디션 공지사항 공개 제어
+        UPDATE TB_AUDITION_NOTICE
+        SET 
+            PUBLIC_YN = #{public_yn}
+        WHERE 1=1
+            AND AUDITION_NOTICE_NO = #{audition_notice_no}
+    </insert>
+
+    <!-- 
+        오디션 공지사항 전체 공개 제어
+        /director/audition/:audition_no/notice-all/public PUT
+    -->
+    <insert id="WHOSPICK.UPDATE.006">
+        -- 오디션 공지사항 공개 제어
+        WITH 
+        UPDATE_AUDITION AS 
+        (
+            UPDATE TB_AUDITION 
+            SET 
+                NOTICE_PUBLIC_YN = #{public_yn}
+            WHERE 1=1
+                AND AUDITION_NO = #{audition_no}
+        )
+        UPDATE TB_AUDITION_NOTICE
+        SET 
+            PUBLIC_YN = #{public_yn}
+        WHERE 1=1
+            AND AUDITION_NO = #{audition_no}
+    </insert>
+
+    <!-- 
+        오디션 요청
+        /director/audition-ask POST
+    -->
+    <insert id="WHOSPICK.INSERT.010">
+        -- 오디션 요청
+        INSERT INTO TB_AUDITION_ASK AS THIS(DIRECTOR_USER_NO, ACTOR_NO)
+        VALUES(#{user_no}, #{actor_no})
+        ON CONFLICT(DIRECTOR_USER_NO, ACTOR_NO) DO 
+        UPDATE 
+        SET 
+            USE_YN = TRUE 
+            , UPDT_DT = floor(date_part('epoch'::text, now()))::bigint
+            , RE_ASKABLE_DT = floor(date_part('epoch'::text, now() + '2 days'::interval))::bigint
+        WHERE 1=1
+            AND THIS.RE_ASKABLE_DT
+            &lt;= 
+            floor(date_part('epoch'::text, now()))::bigint
+    </insert>
+
+    <!-- 
+        찜한 배우 전부에게 오디션 요청
+        /director/audition-ask/all-dibs POST
+    -->
+    <insert id="WHOSPICK.INSERT.011">
+        -- 전부 오디션 요청
+        INSERT INTO TB_AUDITION_ASK AS THIS(DIRECTOR_USER_NO, ACTOR_NO) 
+        SELECT #{user_no}, ACTOR_NO 
+        FROM TB_DIBS_ACTOR TDA 
+        WHERE 1=1
+            AND DIRECTOR_USER_NO = #{user_no}
+            AND DIBS_YN 
+        ON CONFLICT(DIRECTOR_USER_NO, ACTOR_NO) DO 
+        UPDATE 
+        SET 
+            USE_YN = TRUE 
+            , UPDT_DT = floor(date_part('epoch'::text, now()))::bigint
+            , RE_ASKABLE_DT = floor(date_part('epoch'::text, now() + '2 days'::interval))::bigint
+        WHERE 1=1
+            RE_ASKABLE_DT
+            &lt;= 
+            floor(date_part('epoch'::text, now()))::bigint
+    </insert>
 </mapper>

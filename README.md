@@ -3,15 +3,16 @@
 [![CircleCI](https://circleci.com/gh/OldBlackJoe/mybatis-mapper.svg?style=svg)](https://circleci.com/gh/OldBlackJoe/mybatis-mapper)
 
 This module is managed separately by fork from OldBlackJoe's [mybatis-mapper](https://www.npmjs.com/package/mybatis-mapper).
+Unlike the original version, which is only for mysql, this version is postgresql compatible.
 
 mybatis-mapper can generate SQL statements from the MyBatis3 Mapper XML file in node.js. <br>
 You can also use Dynamic SQL elements, for example, &lt;if&gt;, &lt;where&gt;, &lt;foreach&gt;.
 
 **Table of contents**
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Change Log](#change-log)
+-   [Installation](#installation)
+-   [Usage](#usage)
+-   [Change Log](#change-log)
 
 ## Installation
 
@@ -23,12 +24,12 @@ npm install --save mybatis-mapper-myyrakle
 
 mybatis-mapper supports all of dynamic SQL elements.<br>
 
-- &lt;if&gt;
-- &lt;choose&gt;, &lt;when&gt;, &lt;otherwise&gt;
-- &lt;trim&gt;, &lt;where&gt;, &lt;set&gt;
-- &lt;foreach&gt;
-- &lt;bind&gt;
-- &lt;include&gt;
+-   &lt;if&gt;
+-   &lt;choose&gt;, &lt;when&gt;, &lt;otherwise&gt;
+-   &lt;trim&gt;, &lt;where&gt;, &lt;set&gt;
+-   &lt;foreach&gt;
+-   &lt;bind&gt;
+-   &lt;include&gt;
 
 You can see description of Dynamic SQL of MyBatis3 in the link below.<br>
 http://www.mybatis.org/mybatis-3/dynamic-sql.html
@@ -57,10 +58,10 @@ First, prepare XML file(s) written in MyBatis3 syntax like below. <br>
 </mapper>
 ```
 
-- The XML file must have one 'mapper' element, which must have the 'namespace' attribute.
-- mybatis-mapper recognizes and parses the 'select', 'insert', 'update', and 'delete' elements in the 'mapper' element as SQL statements.
-- You can use CDATA section in xml for well-formed XML.
-- other attributes are ignored.
+-   The XML file must have one 'mapper' element, which must have the 'namespace' attribute.
+-   mybatis-mapper recognizes and parses the 'select', 'insert', 'update', and 'delete' elements in the 'mapper' element as SQL statements.
+-   You can use CDATA section in xml for well-formed XML.
+-   other attributes are ignored.
 
 Second, writing Node.js codes. <br>
 
@@ -72,9 +73,9 @@ const mybatisMapper = require("mybatis-mapper-myyrakle");
 
 // create the connection to database
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  database: "test",
+    host: "localhost",
+    user: "root",
+    database: "test",
 });
 
 // create the myBatisMapper from xml file
@@ -82,8 +83,8 @@ mybatisMapper.createMapper(["./fruits.xml"]);
 
 // SQL Parameters
 var param = {
-  category: "apple",
-  price: 100,
+    category: "apple",
+    price: 100,
 };
 
 // Get SQL Statement
@@ -92,22 +93,22 @@ var query = mybatisMapper.getStatement("fruit", "testBasic", param, format);
 
 // Do it!
 connection.query(query, function (err, results, fields) {
-  console.log(results);
-  console.log(fields);
+    console.log(results);
+    console.log(fields);
 });
 ```
 
 ##### createMapper( [XML Files] )
 
-- This method takes Array of XML files as a arguments.
-- Reads and parses the specified xml file to prepare the SQL statements.
+-   This method takes Array of XML files as a arguments.
+-   Reads and parses the specified xml file to prepare the SQL statements.
 
 ##### getStatement(Namespace, SqlID, Parameters, format)
 
-- This method takes Namespace, SQL ID, and Parameters as a arguments.
-- Create SQL statement from XML using Parameters and return it.
-- You can use this SQL string for Node.js MySQL Clients like mysql2.
-- "format" argument is Optional, it can set the format of the SQL language and indent.<br> For more information, see https://www.npmjs.com/package/sql-formatter
+-   This method takes Namespace, SQL ID, and Parameters as a arguments.
+-   Create SQL statement from XML using Parameters and return it.
+-   You can use this SQL string for Node.js MySQL Clients like mysql2.
+-   "format" argument is Optional, it can set the format of the SQL language and indent.<br> For more information, see https://www.npmjs.com/package/sql-formatter
 
 ### 2) Parameters ( #{...}, \${...} )
 
@@ -137,13 +138,13 @@ connection.query(query, function (err, results, fields) {
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  category: "apple",
-  price: 100,
+    category: "apple",
+    price: 100,
 };
 
 var query = mybatisMapper.getStatement("fruit", "testParameters", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -162,9 +163,9 @@ WHERE
   AND price > 100
 ```
 
-- As in the example above, if a variable is enclosed in #{ }, the variable is wrapped in quotation marks.
-- The other side, if the variable is enclosed in \${ }, the variable is converted as it is.
-- In general, you can use #{ } for a String variable, and \${ } for a numeric value.
+-   As in the example above, if a variable is enclosed in #{ }, the variable is wrapped in quotation marks.
+-   The other side, if the variable is enclosed in \${ }, the variable is converted as it is.
+-   In general, you can use #{ } for a String variable, and \${ } for a numeric value.
 
 ### 3) &lt;if&gt; element
 
@@ -202,13 +203,13 @@ WHERE
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  category: "apple",
-  price: 500,
+    category: "apple",
+    price: 500,
 };
 
 var query = mybatisMapper.getStatement("fruit", "testIf", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -229,7 +230,7 @@ WHERE
   AND name = 'Fuji'
 ```
 
-- You can use dynamic SQL elements repeatedly. for example, &lt;if&gt;&lt;if&gt;&lt;/if&gt;&lt;/if&gt;
+-   You can use dynamic SQL elements repeatedly. for example, &lt;if&gt;&lt;if&gt;&lt;/if&gt;&lt;/if&gt;
 
 ### 4) &lt;trim&gt; element
 
@@ -262,8 +263,8 @@ mybatisMapper.createMapper(["./fruits.xml"]);
 var param = null;
 
 var query = mybatisMapper.getStatement("fruit", "testTrim", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -314,12 +315,12 @@ WHERE
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  price: 500,
+    price: 500,
 };
 
 var query = mybatisMapper.getStatement("fruit", "testWhere", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -369,14 +370,14 @@ WHERE
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  name: "Fuji",
-  category: "apple",
-  price: 300,
+    name: "Fuji",
+    category: "apple",
+    price: 300,
 };
 
 var query = mybatisMapper.getStatement("fruit", "testSet", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -434,14 +435,14 @@ WHERE
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  name: null,
-  category: "banana",
-  price: 300,
+    name: null,
+    category: "banana",
+    price: 300,
 };
 
 var query = mybatisMapper.getStatement("fruit", "testChoose", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -493,12 +494,12 @@ WHERE
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  apples: ["Jonathan", "Mcintosh", "Fuji"],
+    apples: ["Jonathan", "Mcintosh", "Fuji"],
 };
 
 var query = mybatisMapper.getStatement("fruit", "testForeach", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -554,22 +555,22 @@ WHERE
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  fruits: [
-    {
-      name: "Jonathan",
-      category: "apple",
-      price: 100,
-    },
-    {
-      name: "Mcintosh",
-      category: "apple",
-      price: 500,
-    },
-  ],
+    fruits: [
+        {
+            name: "Jonathan",
+            category: "apple",
+            price: 100,
+        },
+        {
+            name: "Mcintosh",
+            category: "apple",
+            price: 500,
+        },
+    ],
 };
 var query = mybatisMapper.getStatement("fruit", "testInsertMulti", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -624,12 +625,12 @@ VALUES
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  name: "Mc",
+    name: "Mc",
 };
 
 var query = mybatisMapper.getStatement("fruit", "testBind", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -689,12 +690,12 @@ WHERE
 var mybatisMapper = require("mybatis-mapper-myyrakle");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
-  category: "apple",
+    category: "apple",
 };
 
 var query = mybatisMapper.getStatement("fruit", "testInclude", param, {
-  language: "sql",
-  indent: "  ",
+    language: "sql",
+    indent: "  ",
 });
 console.log(query);
 ```
@@ -716,66 +717,66 @@ WHERE
 
 ### 0.6.5
 
-- Fix Unexpected end of input error
+-   Fix Unexpected end of input error
 
 ### 0.6.4
 
-- Fix JSON data type parsing (arrays/objects)
+-   Fix JSON data type parsing (arrays/objects)
 
 ### 0.6.3
 
-- Fix bug that Null parameter was not converted.
+-   Fix bug that Null parameter was not converted.
 
 ### 0.6.2
 
-- Hot fix for &lt;foreach&gt; element.
+-   Hot fix for &lt;foreach&gt; element.
 
 ### 0.6.1
 
-- Improved parameter conversion logic.
-- Bug fix for &lt;trim&gt; &lt;where&gt; elements.
+-   Improved parameter conversion logic.
+-   Bug fix for &lt;trim&gt; &lt;where&gt; elements.
 
 ### 0.6.0
 
-- Added typings for use with TypeScript.
+-   Added typings for use with TypeScript.
 
 ### 0.5.3
 
-- Hot fix for &lt;include&gt; element.
+-   Hot fix for &lt;include&gt; element.
 
 ### 0.5.2
 
-- Error Handling
+-   Error Handling
 
 ### 0.5.1
 
-- Hot fix for &lt;foreach&gt; element.
+-   Hot fix for &lt;foreach&gt; element.
 
 ### 0.5.0
 
-- Support &lt;include&gt; element.
-- Do not formatting SQL when 'format' parameter is null
-- Bug fix
+-   Support &lt;include&gt; element.
+-   Do not formatting SQL when 'format' parameter is null
+-   Bug fix
 
 ### 0.4.0
 
-- Support &lt;set&gt; element.
-- Support &lt;bind&gt; element.
-- SQL formatting using [sql-formatter](https://www.npmjs.com/package/sql-formatter).
-- Bug fix
+-   Support &lt;set&gt; element.
+-   Support &lt;bind&gt; element.
+-   SQL formatting using [sql-formatter](https://www.npmjs.com/package/sql-formatter).
+-   Bug fix
 
 ### 0.3.0
 
-- Support CDATA section
-- Bug fix & Error Handling
+-   Support CDATA section
+-   Bug fix & Error Handling
 
 ### 0.2.0
 
-- Change XML parsing library xml2js to [html-parse-stringify2](https://www.npmjs.com/package/html-parse-stringify2).
-- Dynamic SQL elements can use repeatedly. for example, &lt;if&gt;&lt;if&gt;&lt;/if&gt;&lt;/if&gt;
-- Support &lt;choose&gt; &lt;when&gt; &lt;otherwise&gt; element.
-- Support &lt;trim&gt; element.
+-   Change XML parsing library xml2js to [html-parse-stringify2](https://www.npmjs.com/package/html-parse-stringify2).
+-   Dynamic SQL elements can use repeatedly. for example, &lt;if&gt;&lt;if&gt;&lt;/if&gt;&lt;/if&gt;
+-   Support &lt;choose&gt; &lt;when&gt; &lt;otherwise&gt; element.
+-   Support &lt;trim&gt; element.
 
 ### 0.1.0
 
-- Initial Version
+-   Initial Version
