@@ -17,7 +17,7 @@ You can also use Dynamic SQL elements, for example, &lt;if&gt;, &lt;where&gt;, &
 ## Installation
 
 ```
-npm install --save mybatis-mapper-myyrakle
+npm install --save mybatis-mapper-haena
 ```
 
 ## Usage
@@ -69,7 +69,7 @@ Second, writing Node.js codes. <br>
 
 ```javascript
 const mysql = require("mysql2");
-const mybatisMapper = require("mybatis-mapper-myyrakle");
+const mybatisMapper = require("mybatis-mapper-haena");
 
 // create the connection to database
 const connection = mysql.createConnection({
@@ -135,7 +135,7 @@ connection.query(query, function (err, results, fields) {
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     category: "apple",
@@ -200,7 +200,7 @@ WHERE
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     category: "apple",
@@ -258,7 +258,7 @@ WHERE
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = null;
 
@@ -312,7 +312,7 @@ WHERE
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     price: 500,
@@ -367,7 +367,7 @@ WHERE
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     name: "Fuji",
@@ -432,7 +432,7 @@ WHERE
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     name: null,
@@ -491,7 +491,7 @@ WHERE
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     apples: ["Jonathan", "Mcintosh", "Fuji"],
@@ -552,7 +552,7 @@ WHERE
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     fruits: [
@@ -622,7 +622,7 @@ VALUES
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     name: "Mc",
@@ -687,7 +687,7 @@ WHERE
 #### fruits.js
 
 ```javascript
-var mybatisMapper = require("mybatis-mapper-myyrakle");
+var mybatisMapper = require("mybatis-mapper-haena");
 mybatisMapper.createMapper(["./fruits.xml"]);
 var param = {
     category: "apple",
